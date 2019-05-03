@@ -52,18 +52,19 @@ export default{
     }
     if(chordArray!=''){
     // find the first fretboard number
-      let chordFretArray = Array.from( chordArray, x => x === 'x' || x === 'o' ? 12: parseInt(x.charAt(0)) );
+      let chordFretArray = Array.from( chordArray, x => x === 'x' || x === 'o' ? 15: parseInt(x.split(':')[0]) );
       let minFret = Math.min(...chordFretArray)-1;
-      let minFretText = minFret+'ft';
+      let minFretText = minFret+1+'fr';
       if( minFret > 1 ){
-        chordArray = Array.from( chordArray, x => x === 'x' || x==='o' ? x: (parseInt(x.charAt(0))-minFret) + x.slice(1) ); 
+        chordArray = Array.from( chordArray, x => x === 'x' || x==='o' ? x: (parseInt(x.split(':')[0])-minFret) + (x.length === 1 ? ':'+x : x.slice(-2)) ); 
+      this.temp = chordArray;
         // mark the first fretboard
       ctx.beginPath();
       ctx.font= fts;
       ctx.textAlign='center';
       ctx.textBaseline='bottom';
       ctx.fillStyle= fg;
-      ctx.fillText(minFretText, init, init);
+      ctx.fillText(minFretText, init+8*hgap/9, init);
       ctx.closePath();
       }
 
@@ -71,7 +72,7 @@ export default{
     ctx.fillStyle= bg;
     for(let i=0; i<6; i++){
       ctx.beginPath();
-      ctx.arc(init+xpos(chordArray[i])[0]-hgap/2, init+vgap*i, 8, 0, 2*Math.PI);
+      ctx.arc(init+xpos(chordArray[i])[0]-hgap/2-6, init+vgap*i, 8, 0, 2*Math.PI);
       ctx.fill();
       ctx.closePath();
     }
@@ -83,7 +84,7 @@ export default{
       ctx.font= ft;
       ctx.textAlign='end';
       ctx.textBaseline='middle';
-      ctx.fillText(xpos(chordArray[i])[1], init+xpos(chordArray[i])[0]-hgap/2+8, init+vgap*i);
+      ctx.fillText(xpos(chordArray[i])[1], init+xpos(chordArray[i])[0]-hgap/2+4, init+vgap*i);
       ctx.closePath();
     }
     }
@@ -98,7 +99,7 @@ export default{
       // charMap: maps the number to circled number (utf8 encoded)
       var charMap = { '1': "\u2460", '2': "\u2461", '3': "\u2462", '4': "\u2463" };
       if(str === 'x' || str === 'o'){
-        var pos=12;
+        var pos=15;
         var finger=str;
       }else{
         pos=parseInt(str[0])*hgap;
@@ -119,6 +120,8 @@ export default{
      * Example output: ['o', '1', 'o', '2', '3', 'x']; //C
      * Example input: '132oxx'
      * Example output: ['1', '3', '2', 'o', 'x', 'x']; //Dm
+     * Example input: '8:18:19:210::410::38:1'
+     * Example output: ['8:1', '8:1', '9:2', '10:4', '10:3', '8:1']
      */
     function stringToArray(str){
       let dataArr=[];
@@ -128,9 +131,15 @@ export default{
         return false;
       }
       for(let i=0, j=0;i<str.length;i++){
-        if(str.charAt(i+1)!=':'){
+        if(str.charAt(i) === '1' && str.charAt(i+2) === ':' && str.charAt(i+3) === ':'){
+          //two digits fretborad position
+          dataArr[j]=str.substring(i,i+3)+str.substring(i+4,i+5);
+          i+=4;
+        }else if(str.charAt(i+1)!=':'){
+          //one digits position with same finger
           dataArr[j]=str.charAt(i);
         }else{
+          //one digits position with different finger
           dataArr[j]=str.substring(i,i+3);
           i+=2;
         }

@@ -1,5 +1,5 @@
 <template>
-  <div id='canvas-wrap'>
+  <div class='canvas-wrap'>
     <canvas ref='canvas'></canvas>
     <slot></slot>
   </div>
@@ -40,6 +40,10 @@ export default {
 <style>
 .gtp{
   border: 3px solid #eee;
+}
+.canvas-wrap{
+  margin: 0 1em 5em 0;
+  /* -webkit-transform:rotate(90deg); */
 }
 </style>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
